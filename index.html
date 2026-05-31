@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perritos de Colores 🐶</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ===== PANTALLA DE VICTORIA ===== -->
+  <div id="victory-screen" class="hidden">
+    <div class="victory-content">
+      <div class="victory-confetti" id="confetti-container"></div>
+      <div class="victory-dog">🐶</div>
+      <h1 class="victory-title">¡GANADOR!</h1>
+      <h2 class="victory-player" id="victory-player-name"></h2>
+      <p class="victory-subtitle">¡Reunió 6 perritos primero!</p>
+      <div class="victory-scores" id="victory-scores"></div>
+      <button class="btn-nueva-partida" onclick="nuevaPartida()">🔄 Nueva Partida</button>
+    </div>
+  </div>
+
+  <!-- ===== PANTALLA PRINCIPAL ===== -->
+  <div id="game-container">
+
+    <!-- ENCABEZADO -->
+    <header id="header">
+      <div class="header-top">
+        <h1 class="game-title">🐶 Perritos de Colores</h1>
+      </div>
+      <div class="header-controls">
+        <div class="turn-indicator">
+          <span class="turn-label">Turno de</span>
+          <span class="turn-player" id="turn-player-name">Jugador 1</span>
+          <span class="turn-info" id="turn-info">Lanza los dados</span>
+        </div>
+        <div class="dice-area">
+          <div class="dice-wrapper">
+            <div class="dado" id="dado1">?</div>
+            <div class="dado" id="dado2">?</div>
+          </div>
+          <div class="btn-group">
+            <button class="btn-lanzar" id="btn-lanzar" onclick="lanzarDados()">🎲 Lanzar Dados</button>
+            <button class="btn-terminar" id="btn-terminar" onclick="terminarTurno()" disabled>✋ Terminar Turno</button>
+          </div>
+        </div>
+        <div class="revelaciones-info" id="revelaciones-info">
+          <span>Revelaciones: <strong id="rev-count">0</strong> / 2</span>
+          <div class="rev-dots">
+            <div class="rev-dot" id="rev-dot-1"></div>
+            <div class="rev-dot" id="rev-dot-2"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- TABLERO CENTRAL -->
+    <main id="tablero-central">
+      <h2 class="zona-titulo">🏠 Tablero Central</h2>
+      <div class="perritos-grid" id="tablero-perritos"></div>
+    </main>
+
+    <!-- PANELES DE JUGADORES -->
+    <section id="jugadores-panel">
+      <div class="jugador-card" id="panel-j1" data-jugador="0">
+        <div class="jugador-header">
+          <span class="jugador-emoji">🧑</span>
+          <span class="jugador-nombre">Jugador 1</span>
+          <span class="jugador-contador" id="contador-j1">0 🐶</span>
+        </div>
+        <div class="jugador-perritos" id="perritos-j1"></div>
+      </div>
+      <div class="jugador-card" id="panel-j2" data-jugador="1">
+        <div class="jugador-header">
+          <span class="jugador-emoji">👩</span>
+          <span class="jugador-nombre">Jugador 2</span>
+          <span class="jugador-contador" id="contador-j2">0 🐶</span>
+        </div>
+        <div class="jugador-perritos" id="perritos-j2"></div>
+      </div>
+      <div class="jugador-card" id="panel-j3" data-jugador="2">
+        <div class="jugador-header">
+          <span class="jugador-emoji">🧒</span>
+          <span class="jugador-nombre">Jugador 3</span>
+          <span class="jugador-contador" id="contador-j3">0 🐶</span>
+        </div>
+        <div class="jugador-perritos" id="perritos-j3"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- MENSAJE TOAST -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
