@@ -29,6 +29,30 @@
       <div class="header-top">
         <h1 class="game-title">🐶 Perritos de Colores</h1>
       </div>
+      <div class="player-config">
+        <label class="config-item">
+          Jugadores
+          <select id="player-count" onchange="actualizarInputsJugadores()">
+            <option value="2">2 jugadores</option>
+            <option value="3" selected>3 jugadores</option>
+          </select>
+        </label>
+        <div class="player-name-inputs" id="player-name-inputs">
+          <label class="player-name-input">
+            Jugador 1
+            <input id="player-name-0" class="player-name-field" type="text" placeholder="Jugador 1" value="Jugador 1" />
+          </label>
+          <label class="player-name-input">
+            Jugador 2
+            <input id="player-name-1" class="player-name-field" type="text" placeholder="Jugador 2" value="Jugador 2" />
+          </label>
+          <label class="player-name-input">
+            Jugador 3
+            <input id="player-name-2" class="player-name-field" type="text" placeholder="Jugador 3" value="Jugador 3" />
+          </label>
+        </div>
+        <button id="btn-apply-players" class="btn-config" onclick="aplicarConfiguracionJugadores()">Aplicar</button>
+      </div>
       <div class="header-controls">
         <div class="turn-indicator">
           <span class="turn-label">Turno de</span>

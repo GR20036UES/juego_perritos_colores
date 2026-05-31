@@ -14,7 +14,7 @@ const COLOR_HEX = {
   rosado:   '#E91E8C',
 };
 
-const NOMBRES_JUGADORES = ['Jugador 1', 'Jugador 2', 'Jugador 3'];
+const DEFAULT_NOMBRES_JUGADORES = ['Jugador 1', 'Jugador 2', 'Jugador 3'];
 const EMOJIS_JUGADORES  = ['🧑', '👩', '🧒'];
 
 const TOTAL_PERRITOS    = 12;   // 2 de cada color
@@ -25,9 +25,14 @@ const REVEAL_DURATION   = 1100; // ms que el color queda visible
 
 // ── Estado del juego ────────────────────────────────
 let estado = {};
+let configuracion = {
+  numJugadores: 3,
+  nombresJugadores: [...DEFAULT_NOMBRES_JUGADORES],
+};
 
 // ── Inicialización ───────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  actualizarInputsJugadores();
   iniciarJuego();
 });
 
@@ -43,21 +48,28 @@ function iniciarJuego() {
   const perritos = coloresMezclados.map((color, i) => ({
     id:    i,
     color: color,
-    dueno: null,  // null = tablero central
+    dueno: null,
   }));
+
+  const nombres = configuracion.nombresJugadores.slice(0, configuracion.numJugadores);
+  while (nombres.length < configuracion.numJugadores) {
+    nombres.push(`Jugador ${nombres.length + 1}`);
+  }
 
   estado = {
     perritos:        perritos,
-    turnoActual:     0,        // índice jugador 0-2
+    turnoActual:     0,
     dadoColores:     [null, null],
     dadosLanzados:   false,
-    revelaciones:    0,        // cuántas ha hecho en este turno
-    turnoActivo:     false,    // true tras lanzar dados
+    revelaciones:    0,
+    turnoActivo:     false,
+    numJugadores:    configuracion.numJugadores,
+    nombresJugadores: nombres,
   };
 
   renderizarJuego();
   actualizarUI();
-  mostrarToast('🎮 ¡Nuevo juego iniciado! Jugador 1 comienza.', 'turno');
+  mostrarToast(`🎮 ¡Nuevo juego iniciado! ${estado.nombresJugadores[0]} comienza.`, 'turno');
 }
 
 // ── Helpers ──────────────────────────────────────────
@@ -94,32 +106,59 @@ function renderizarTablero() {
   const container = document.getElementById('tablero-perritos');
   container.innerHTML = '';
 
-  const perritosTablero = estado.perritos.filter(p => p.dueno === null);
-  perritosTablero.forEach(perrito => {
-    container.appendChild(crearElementoPerrito(perrito, 'tablero'));
-  });
+  for (let slot = 0; slot < TOTAL_PERRITOS; slot++) {
+    const perrito = estado.perritos.find(p => p.id === slot && p.dueno === null);
+    const slotEl = document.createElement('div');
+    slotEl.className = 'perrito-slot';
+
+    if (perrito) {
+      slotEl.appendChild(crearElementoPerrito(perrito, 'tablero'));
+    } else {
+      slotEl.classList.add('empty');
+    }
+
+    container.appendChild(slotEl);
+  }
 }
 
 /**
  * Dibuja los mazos de cada jugador.
  */
 function renderizarJugadores() {
+  const jugadoresPanel = document.getElementById('jugadores-panel');
+  jugadoresPanel.style.gridTemplateColumns = `repeat(${estado.numJugadores}, 1fr)`;
+
   for (let j = 0; j < 3; j++) {
     const panel     = document.getElementById(`panel-j${j + 1}`);
     const container = document.getElementById(`perritos-j${j + 1}`);
     const contador  = document.getElementById(`contador-j${j + 1}`);
 
-    // Perritos de este jugador
+    if (j >= estado.numJugadores) {
+      panel.classList.add('hidden');
+      continue;
+    }
+
+    panel.classList.remove('hidden');
+    panel.querySelector('.jugador-nombre').textContent = estado.nombresJugadores[j];
+
     const perritosDueno = estado.perritos.filter(p => p.dueno === j);
 
     container.innerHTML = '';
-    perritosDueno.forEach(perrito => {
-      container.appendChild(crearElementoPerrito(perrito, 'jugador', j));
-    });
+    for (let slot = 0; slot < TOTAL_PERRITOS; slot++) {
+      const perrito = estado.perritos.find(p => p.id === slot && p.dueno === j);
+      const slotEl = document.createElement('div');
+      slotEl.className = 'perrito-slot';
+
+      if (perrito) {
+        slotEl.appendChild(crearElementoPerrito(perrito, 'jugador', j));
+      } else {
+        slotEl.classList.add('empty');
+      }
+
+      container.appendChild(slotEl);
+    }
 
     contador.textContent = `${perritosDueno.length} 🐶`;
-
-    // Resaltar jugador activo
     panel.classList.toggle('activo', j === estado.turnoActual);
   }
 }
@@ -202,7 +241,7 @@ function textColor(color) {
  */
 function actualizarUI() {
   const j = estado.turnoActual;
-  document.getElementById('turn-player-name').textContent = NOMBRES_JUGADORES[j];
+  document.getElementById('turn-player-name').textContent = estado.nombresJugadores[j];
 
   const btnLanzar   = document.getElementById('btn-lanzar');
   const btnTerminar = document.getElementById('btn-terminar');
@@ -252,6 +291,7 @@ function lanzarDados() {
     const c1 = colorAleatorio();
     const c2 = colorAleatorio();
     estado.dadoColores = [c1, c2];
+    estado.dadosUsados   = [false, false];
     estado.dadosLanzados = true;
     estado.turnoActivo   = true;
     estado.revelaciones  = 0;
@@ -283,6 +323,16 @@ function nombreColor(c) {
   return c.charAt(0).toUpperCase() + c.slice(1);
 }
 
+function obtenerDadoDisponible(color) {
+  if (!estado.dadoColores || !estado.dadosUsados) return -1;
+  for (let i = 0; i < estado.dadoColores.length; i++) {
+    if (estado.dadoColores[i] === color && !estado.dadosUsados[i]) {
+      return i;
+    }
+  }
+  return -1;
+}
+
 // ── Lógica de clic sobre perrito ─────────────────────
 
 /**
@@ -305,9 +355,14 @@ function manejarClicPerrito(idPerrito, elemento) {
   const perrito = estado.perritos.find(p => p.id === idPerrito);
   if (!perrito) return;
 
-  // Contar revelación INMEDIATAMENTE
-  estado.revelaciones++;
-  actualizarUI();
+  const jugadorActual = estado.turnoActual;
+  const esPropio = perrito.dueno === jugadorActual;
+
+  if (!esPropio) {
+    // Contar revelación INMEDIATAMENTE solo si no es de este jugador
+    estado.revelaciones++;
+    actualizarUI();
+  }
   playSound('revelar');
 
   // Animación: mostrar lengua
@@ -315,14 +370,17 @@ function manejarClicPerrito(idPerrito, elemento) {
 
   setTimeout(() => {
     const colorPerrito = perrito.color;
-    const coincide     = estado.dadoColores.includes(colorPerrito);
     const duenoActual  = perrito.dueno;
-    const jugadorActual = estado.turnoActual;
+    const dadoDisponible = obtenerDadoDisponible(colorPerrito);
+    const coincide = dadoDisponible !== -1;
 
     if (coincide) {
-      // ── Captura ──
+      if (duenoActual !== jugadorActual) {
+        estado.dadosUsados[dadoDisponible] = true;
+      }
+
       if (duenoActual === jugadorActual) {
-        // Ya es tuyo; no pasa nada especial (raro pero posible)
+        // Ya es tuyo; no pasa nada especial
         elemento.classList.remove('revelando');
       } else if (duenoActual === null) {
         // Del tablero → capturar
@@ -343,7 +401,7 @@ function manejarClicPerrito(idPerrito, elemento) {
         elemento.classList.remove('revelando');
         elemento.classList.add('capturando');
         playSound('robo');
-        mostrarToast(`🦊 ¡Robaste un perrito ${colorPerrito} de ${NOMBRES_JUGADORES[duenoActual]}!`, 'robo');
+        mostrarToast(`🦊 ¡Robaste un perrito ${colorPerrito} de ${estado.nombresJugadores[duenoActual]}!`, 'robo');
         setTimeout(() => {
           perrito.dueno = jugadorActual;
           renderizarJuego();
@@ -354,8 +412,10 @@ function manejarClicPerrito(idPerrito, elemento) {
         }, 500);
       }
     } else {
-      // ── Fallo ──
-      mostrarToast(`❌ Era ${colorPerrito}… No coincide`, 'fallo');
+      const mensaje = estado.dadoColores.includes(colorPerrito)
+        ? `❌ El color ${colorPerrito} ya se usó con ese dado` 
+        : `❌ Era ${colorPerrito}… No coincide`;
+      mostrarToast(mensaje, 'fallo');
       playSound('fallo');
       setTimeout(() => {
         elemento.classList.remove('revelando');
@@ -380,11 +440,12 @@ function terminarTurno() {
   }
 
   // Reset estado de turno
-  estado.turnoActual   = (estado.turnoActual + 1) % 3;
+  estado.turnoActual   = (estado.turnoActual + 1) % estado.numJugadores;
   estado.dadosLanzados = false;
   estado.turnoActivo   = false;
   estado.revelaciones  = 0;
   estado.dadoColores   = [null, null];
+  estado.dadosUsados   = [false, false];
 
   // Resetear dados visuales
   const d1 = document.getElementById('dado1');
@@ -398,7 +459,7 @@ function terminarTurno() {
 
   renderizarJugadores(); // Actualiza resaltado activo
   actualizarUI();
-  mostrarToast(`🔄 Turno de ${NOMBRES_JUGADORES[estado.turnoActual]}`, 'turno');
+  mostrarToast(`🔄 Turno de ${estado.nombresJugadores[estado.turnoActual]}`, 'turno');
 }
 
 // ── Victoria ─────────────────────────────────────────
@@ -407,7 +468,7 @@ function terminarTurno() {
  * Verifica si algún jugador ha ganado.
  */
 function verificarVictoria() {
-  for (let j = 0; j < 3; j++) {
+  for (let j = 0; j < estado.numJugadores; j++) {
     const total = estado.perritos.filter(p => p.dueno === j).length;
     if (total >= GOAL) {
       setTimeout(() => mostrarVictoria(j), 600);
@@ -426,16 +487,16 @@ function mostrarVictoria(ganador) {
   screen.classList.remove('hidden');
 
   document.getElementById('victory-player-name').textContent =
-    `${EMOJIS_JUGADORES[ganador]} ${NOMBRES_JUGADORES[ganador]}`;
+    `${EMOJIS_JUGADORES[ganador]} ${estado.nombresJugadores[ganador]}`;
 
   // Marcador final
   const scoresEl = document.getElementById('victory-scores');
   scoresEl.innerHTML = '';
-  for (let j = 0; j < 3; j++) {
+  for (let j = 0; j < estado.numJugadores; j++) {
     const count = estado.perritos.filter(p => p.dueno === j).length;
     const item  = document.createElement('div');
     item.className = `victory-score-item${j === ganador ? ' winner' : ''}`;
-    item.textContent = `${EMOJIS_JUGADORES[j]} ${NOMBRES_JUGADORES[j]}: ${count} 🐶`;
+    item.textContent = `${EMOJIS_JUGADORES[j]} ${estado.nombresJugadores[j]}: ${count} 🐶`;
     scoresEl.appendChild(item);
   }
 
@@ -475,6 +536,29 @@ function crearConfetti() {
 function nuevaPartida() {
   document.getElementById('victory-screen').classList.add('hidden');
   document.getElementById('confetti-container').innerHTML = '';
+  iniciarJuego();
+}
+
+function actualizarInputsJugadores() {
+  const cantidad = Number(document.getElementById('player-count').value);
+  const inputs = document.querySelectorAll('.player-name-input');
+  inputs.forEach((input, index) => {
+    input.classList.toggle('hidden', index >= cantidad);
+  });
+}
+
+function aplicarConfiguracionJugadores() {
+  const cantidad = Number(document.getElementById('player-count').value);
+  const nombres = [];
+
+  for (let i = 0; i < cantidad; i++) {
+    const input = document.getElementById(`player-name-${i}`);
+    const nombre = input.value.trim() || `Jugador ${i + 1}`;
+    nombres.push(nombre);
+  }
+
+  configuracion.numJugadores = cantidad;
+  configuracion.nombresJugadores = nombres;
   iniciarJuego();
 }
 
