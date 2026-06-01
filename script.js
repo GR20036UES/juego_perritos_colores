@@ -129,7 +129,7 @@ function renderizarTablero() {
  */
 function renderizarJugadores() {
   const jugadoresPanel = document.getElementById('jugadores-panel');
-  jugadoresPanel.style.gridTemplateColumns = `repeat(${estado.numJugadores}, 1fr)`;
+  jugadoresPanel.style.gridTemplateColumns = '';
 
   for (let j = 0; j < MAX_PLAYERS; j++) {
     const panel     = document.getElementById(`panel-j${j + 1}`);

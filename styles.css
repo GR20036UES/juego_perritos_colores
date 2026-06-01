@@ -567,8 +567,9 @@ body {
 ─────────────────────────────────────────────────── */
 #jugadores-panel {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 0.75rem;
+  width: 100%;
 }
 
 .jugador-card {
@@ -694,6 +695,12 @@ body {
 /* ───────────────────────────────────────────────────
    RESPONSIVE
 ─────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  #jugadores-panel {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
 @media (max-width: 700px) {
   .header-controls {
     justify-content: center;
