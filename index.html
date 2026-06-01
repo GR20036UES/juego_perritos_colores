@@ -35,6 +35,10 @@
           <select id="player-count" onchange="actualizarInputsJugadores()">
             <option value="2">2 jugadores</option>
             <option value="3" selected>3 jugadores</option>
+            <option value="4">4 jugadores</option>
+            <option value="5">5 jugadores</option>
+            <option value="6">6 jugadores</option>
+            <option value="7">7 jugadores</option>
           </select>
         </label>
         <div class="player-name-inputs" id="player-name-inputs">
@@ -49,6 +53,22 @@
           <label class="player-name-input">
             Jugador 3
             <input id="player-name-2" class="player-name-field" type="text" placeholder="Jugador 3" value="Jugador 3" />
+          </label>
+          <label class="player-name-input player-name-input-3">
+            Jugador 4
+            <input id="player-name-3" class="player-name-field" type="text" placeholder="Jugador 4" value="Jugador 4" />
+          </label>
+          <label class="player-name-input player-name-input-4">
+            Jugador 5
+            <input id="player-name-4" class="player-name-field" type="text" placeholder="Jugador 5" value="Jugador 5" />
+          </label>
+          <label class="player-name-input player-name-input-5">
+            Jugador 6
+            <input id="player-name-5" class="player-name-field" type="text" placeholder="Jugador 6" value="Jugador 6" />
+          </label>
+          <label class="player-name-input player-name-input-6">
+            Jugador 7
+            <input id="player-name-6" class="player-name-field" type="text" placeholder="Jugador 7" value="Jugador 7" />
           </label>
         </div>
         <button id="btn-apply-players" class="btn-config" onclick="aplicarConfiguracionJugadores()">Aplicar</button>
@@ -110,6 +130,38 @@
           <span class="jugador-contador" id="contador-j3">0 🐶</span>
         </div>
         <div class="jugador-perritos" id="perritos-j3"></div>
+      </div>
+      <div class="jugador-card" id="panel-j4" data-jugador="3">
+        <div class="jugador-header">
+          <span class="jugador-emoji">🧑‍🦱</span>
+          <span class="jugador-nombre">Jugador 4</span>
+          <span class="jugador-contador" id="contador-j4">0 🐶</span>
+        </div>
+        <div class="jugador-perritos" id="perritos-j4"></div>
+      </div>
+      <div class="jugador-card" id="panel-j5" data-jugador="4">
+        <div class="jugador-header">
+          <span class="jugador-emoji">🧑‍🦰</span>
+          <span class="jugador-nombre">Jugador 5</span>
+          <span class="jugador-contador" id="contador-j5">0 🐶</span>
+        </div>
+        <div class="jugador-perritos" id="perritos-j5"></div>
+      </div>
+      <div class="jugador-card" id="panel-j6" data-jugador="5">
+        <div class="jugador-header">
+          <span class="jugador-emoji">🧓</span>
+          <span class="jugador-nombre">Jugador 6</span>
+          <span class="jugador-contador" id="contador-j6">0 🐶</span>
+        </div>
+        <div class="jugador-perritos" id="perritos-j6"></div>
+      </div>
+      <div class="jugador-card" id="panel-j7" data-jugador="6">
+        <div class="jugador-header">
+          <span class="jugador-emoji">🧕</span>
+          <span class="jugador-nombre">Jugador 7</span>
+          <span class="jugador-contador" id="contador-j7">0 🐶</span>
+        </div>
+        <div class="jugador-perritos" id="perritos-j7"></div>
       </div>
     </section>
 

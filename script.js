@@ -14,10 +14,12 @@ const COLOR_HEX = {
   rosado:   '#E91E8C',
 };
 
-const DEFAULT_NOMBRES_JUGADORES = ['Jugador 1', 'Jugador 2', 'Jugador 3'];
-const EMOJIS_JUGADORES  = ['🧑', '👩', '🧒'];
+const MAX_PLAYERS = 7;
+const DEFAULT_NOMBRES_JUGADORES = ['Jugador 1', 'Jugador 2', 'Jugador 3', 'Jugador 4', 'Jugador 5', 'Jugador 6', 'Jugador 7'];
+const EMOJIS_JUGADORES  = ['🧑', '👩', '🧒', '🧑‍🦱', '🧑‍🦰', '🧓', '🧕'];
 
 const TOTAL_PERRITOS    = 12;   // 2 de cada color
+const HAND_SLOTS        = 6;    // espacios fijos en el mazo de cada jugador
 const GOAL              = 6;    // perritos para ganar
 const MAX_CAPTURAS      = 2;    // capturas posibles por turno
 const MAX_REVELACIONES  = 2;    // revelaciones por turno
@@ -44,11 +46,12 @@ function iniciarJuego() {
   const coloresBase = COLORES.flatMap(c => [c, c]);
   const coloresMezclados = mezclar(coloresBase);
 
-  // Perritos: { id, color, dueño: null | 0|1|2 }
+  // Perritos: { id, color, dueno: null | playerIndex, slot: null | 0..HAND_SLOTS-1 }
   const perritos = coloresMezclados.map((color, i) => ({
     id:    i,
     color: color,
     dueno: null,
+    slot:  null,
   }));
 
   const nombres = configuracion.nombresJugadores.slice(0, configuracion.numJugadores);
@@ -128,7 +131,7 @@ function renderizarJugadores() {
   const jugadoresPanel = document.getElementById('jugadores-panel');
   jugadoresPanel.style.gridTemplateColumns = `repeat(${estado.numJugadores}, 1fr)`;
 
-  for (let j = 0; j < 3; j++) {
+  for (let j = 0; j < MAX_PLAYERS; j++) {
     const panel     = document.getElementById(`panel-j${j + 1}`);
     const container = document.getElementById(`perritos-j${j + 1}`);
     const contador  = document.getElementById(`contador-j${j + 1}`);
@@ -144,8 +147,8 @@ function renderizarJugadores() {
     const perritosDueno = estado.perritos.filter(p => p.dueno === j);
 
     container.innerHTML = '';
-    for (let slot = 0; slot < TOTAL_PERRITOS; slot++) {
-      const perrito = estado.perritos.find(p => p.id === slot && p.dueno === j);
+    for (let slot = 0; slot < HAND_SLOTS; slot++) {
+      const perrito = estado.perritos.find(p => p.dueno === j && p.slot === slot);
       const slotEl = document.createElement('div');
       slotEl.className = 'perrito-slot';
 
@@ -333,6 +336,14 @@ function obtenerDadoDisponible(color) {
   return -1;
 }
 
+function obtenerRanuraLibre(jugador) {
+  for (let s = 0; s < HAND_SLOTS; s++) {
+    const ocupado = estado.perritos.some(p => p.dueno === jugador && p.slot === s);
+    if (!ocupado) return s;
+  }
+  return -1;
+}
+
 // ── Lógica de clic sobre perrito ─────────────────────
 
 /**
@@ -390,6 +401,8 @@ function manejarClicPerrito(idPerrito, elemento) {
         mostrarToast(`✅ ¡Capturaste un perrito ${colorPerrito}!`, 'exito');
         setTimeout(() => {
           perrito.dueno = jugadorActual;
+          const ran = obtenerRanuraLibre(jugadorActual);
+          perrito.slot = ran >= 0 ? ran : 0;
           renderizarJuego();
           verificarVictoria();
           if (estado.revelaciones >= MAX_REVELACIONES) {
@@ -404,6 +417,8 @@ function manejarClicPerrito(idPerrito, elemento) {
         mostrarToast(`🦊 ¡Robaste un perrito ${colorPerrito} de ${estado.nombresJugadores[duenoActual]}!`, 'robo');
         setTimeout(() => {
           perrito.dueno = jugadorActual;
+          const ran = obtenerRanuraLibre(jugadorActual);
+          perrito.slot = ran >= 0 ? ran : 0;
           renderizarJuego();
           verificarVictoria();
           if (estado.revelaciones >= MAX_REVELACIONES) {
